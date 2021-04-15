@@ -12,7 +12,7 @@
       >
         <input
           :disabled="defaultOptions.items.disabled || disabled"
-          :id="label.name + group" :value="getLabelValue(label)"
+          :id="label.name + group"
           :name="name"
           type="radio"
           v-on:click="toggle(getLabelValue(label), $event)"
@@ -53,7 +53,7 @@ export default {
       required: false
     },
     value: {
-      type: String,
+      type: null,
       required: false
     },
     name: {
@@ -173,17 +173,19 @@ export default {
     },
     mergeDefaultOptionsWithProp (options) {
       var result = this.defaultOptions
-      for (var option in options) {
-        if (options[option] !== null && typeof (options[option]) === 'object') {
-          for (var subOption in options[option]) {
-            if (options[option][subOption] !== undefined && options[option][subOption] !== null) {
-              result[option][subOption] = options[option][subOption]
+      let combineRecursively = function (target, source) {
+        for (var option in source) {
+          if (source[option] !== null && typeof (source[option]) === 'object') {
+            if (typeof target[option] !== 'object') {
+              target[option] = {}
             }
+            combineRecursively(target[option], source[option])
+          } else {
+            target[option] = source[option]
           }
-        } else {
-          result[option] = options[option]
         }
       }
+      combineRecursively(result, options)
     },
     getLabelValue(label) {
       return typeof label.value !== 'undefined' ? label.value : label.name
